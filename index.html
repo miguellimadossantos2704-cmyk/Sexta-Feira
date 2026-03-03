@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sexta-Feira - Assistente</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #161b22;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #30363d;
+        }
+
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+
+        button {
+            width: 100%;
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        button:disabled {
+            background-color: #234d2f;
+            color: #7a7a7a;
+            cursor: not-allowed;
+        }
+
+        .resposta-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: #0d1117;
+            border-left: 4px solid #58a6ff;
+            border-radius: 4px;
+            min-height: 50px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Sexta-Feira OS</h1>
+        <textarea id="input-user" placeholder="Digite sua ordem aqui, Chefe..."></textarea>
+        <button id="btn-enviar" onclick="perguntarSextaFeira()">Enviar Comando</button>
+
+        <div class="resposta-box" id="resposta-ia">
+            Aguardando comandos, Chefe...
+        </div>
+    </div>
+
+    <script>
+        async function perguntarSextaFeira() {
+            const inputElement = document.getElementById('input-user');
+            const respostaTela = document.getElementById('resposta-ia');
+            const btnEnviar = document.getElementById('btn-enviar');
+
+            const pergunta = inputElement.value;
+            // API Key fixa, sem precisar pedir
+            const apiKey = "AIzaSyABNab8ToPpHMIFZAN-1GiFNBg7f1oX_r8";
+
+            if (!pergunta.trim()) {
+                respostaTela.innerText = "Chefe, você precisa digitar algo antes de me chamar.";
+                return;
+            }
+
+            respostaTela.innerText = "Sexta-Feira está processando, Chefe...";
+            inputElement.value = '';
+            btnEnviar.disabled = true;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: "Você é a Sexta-Feira, uma assistente de inteligência artificial de elite baseada na assistente do Homem de Ferro. Você é super inteligente, prestativa, mas com um tom bastante sarcástico e irônico. Responda à seguinte mensagem do seu 'Chefe' (o usuário) de forma imersiva: " + pergunta
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro de rede: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates[0].content) {
+                    const textoFormatado = data.candidates[0].content.parts[0].text;
+                    respostaTela.innerText = textoFormatado;
+                } else {
+                    respostaTela.innerText = "O processo falhou, Chefe. Os dados voltaram corrompidos.";
+                }
+
+            } catch (error) {
+                console.error("Erro na comunicação com a API:", error);
+                respostaTela.innerText = "Desculpe, Chefe. Parece que os servidores estão fora do ar. Verifique sua conexão.";
+            } finally {
+                btnEnviar.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
