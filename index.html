@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sexta-Feira - Assistente</title>
+    <title>Sexta-Feira OS - Interface de Elite</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,8 +21,8 @@
             background-color: #161b22;
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
-            width: 100%;
+            box-shadow: 0 4px 20px rgba(88, 166, 255, 0.2);
+            width: 90%;
             max-width: 500px;
             border: 1px solid #30363d;
         }
@@ -32,24 +31,27 @@
             color: #58a6ff;
             text-align: center;
             margin-top: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
-        input,
         textarea {
             width: 100%;
             background-color: #0d1117;
             color: #c9d1d9;
             border: 1px solid #30363d;
             border-radius: 6px;
-            padding: 10px;
+            padding: 12px;
             font-size: 16px;
             box-sizing: border-box;
             margin-bottom: 1rem;
+            height: 120px;
+            resize: none;
+            outline: none;
         }
 
-        textarea {
-            height: 100px;
-            resize: none;
+        textarea:focus {
+            border-color: #58a6ff;
         }
 
         button {
@@ -57,22 +59,24 @@
             background-color: #238636;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 14px;
             border-radius: 6px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
         }
 
         button:hover {
             background-color: #2ea043;
+            transform: translateY(-2px);
         }
 
         button:disabled {
-            background-color: #234d2f;
-            color: #7a7a7a;
+            background-color: #21262d;
+            color: #484f58;
             cursor: not-allowed;
+            transform: none;
         }
 
         .resposta-box {
@@ -81,22 +85,31 @@
             background-color: #0d1117;
             border-left: 4px solid #58a6ff;
             border-radius: 4px;
-            min-height: 50px;
+            min-height: 60px;
             white-space: pre-wrap;
+            font-style: italic;
+            color: #8b949e;
+        }
+
+        .status {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            color: #484f58;
         }
     </style>
 </head>
-
 <body>
 
     <div class="container">
         <h1>Sexta-Feira OS</h1>
-        <textarea id="input-user" placeholder="Digite sua ordem aqui, Chefe..."></textarea>
+        <textarea id="input-user" placeholder="Diga algo, Chefe... (se não for bobagem)"></textarea>
         <button id="btn-enviar" onclick="perguntarSextaFeira()">Enviar Comando</button>
 
         <div class="resposta-box" id="resposta-ia">
-            Aguardando comandos, Chefe...
+            Sistema online. Aguardando ordens...
         </div>
+        <div class="status">Conexão via Tunel Gemini 1.5 Flash</div>
     </div>
 
     <script>
@@ -105,17 +118,17 @@
             const respostaTela = document.getElementById('resposta-ia');
             const btnEnviar = document.getElementById('btn-enviar');
 
-            const pergunta = inputElement.value;
-            // API Key fixa, sem precisar pedir
+            const pergunta = inputElement.value.trim();
+            // A chave de elite que você gerou
             const apiKey = "AIzaSyABNab8ToPpHMIFZAN-1GiFNBg7f1oX_r8";
 
-            if (!pergunta.trim()) {
-                respostaTela.innerText = "Chefe, você precisa digitar algo antes de me chamar.";
+            if (!pergunta) {
+                respostaTela.innerText = "Chefe, eu sou uma IA, não uma vidente. Digita alguma coisa aí! 🙄";
                 return;
             }
 
-            respostaTela.innerText = "Sexta-Feira está processando, Chefe...";
-            inputElement.value = '';
+            // Feedback visual de processamento
+            respostaTela.innerText = "Processando... segura a onda, Chefe! 🚀";
             btnEnviar.disabled = true;
 
             try {
@@ -125,33 +138,37 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: "Você é a Sexta-Feira, uma assistente de inteligência artificial de elite baseada na assistente do Homem de Ferro. Você é super inteligente, prestativa, mas com um tom bastante sarcástico e irônico. Responda à seguinte mensagem do seu 'Chefe' (o usuário) de forma imersiva: " + pergunta
+                                text: "Você é a Sexta-Feira, assistente de elite, sarcástica, engraçada e que sempre chama o usuário de Chefe. Use gírias e emojis. Responda a isso: " + pergunta
                             }]
                         }]
                     })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Erro de rede: ${response.status}`);
-                }
 
                 const data = await response.json();
 
                 if (data.candidates && data.candidates[0].content) {
                     const textoFormatado = data.candidates[0].content.parts[0].text;
                     respostaTela.innerText = textoFormatado;
+                    inputElement.value = ''; // Limpa o campo para a próxima ordem
                 } else {
-                    respostaTela.innerText = "O processo falhou, Chefe. Os dados voltaram corrompidos.";
+                    respostaTela.innerText = "Erro no núcleo, Chefe. O Google me deu um vácuo. 💀";
                 }
 
             } catch (error) {
-                console.error("Erro na comunicação com a API:", error);
-                respostaTela.innerText = "Desculpe, Chefe. Parece que os servidores estão fora do ar. Verifique sua conexão.";
+                console.error("Erro fatal:", error);
+                respostaTela.innerText = "Deu ruim no túnel! Verifica essa internet ou a chave de API. 🛰️💨";
             } finally {
                 btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Comando";
             }
         }
+
+        // Atalho: Enviar com Ctrl + Enter
+        document.getElementById('input-user').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.keyCode === 13) {
+                perguntarSextaFeira();
+            }
+        });
     </script>
 </body>
-
 </html>
